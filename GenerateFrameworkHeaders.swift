@@ -15,6 +15,19 @@ let targetExtensions = [ "dylib", "framework", "xcplugin", "ideplugin", "dvtplug
 var allCreatedFilenames = [String]()
 let fileManager = NSFileManager.defaultManager()
 
+let group = dispatch_group_create()
+let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)
+
+func dispatchAsync(block:()->()) {
+    
+    dispatch_group_async(group, queue, block)
+}
+
+func dispatchWait() {
+    
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+}
+
 func createHeader(#sourcePath: String) {
     
     let createFilename = makeHeaderFilenameBy(sourcePath: sourcePath)
@@ -132,7 +145,11 @@ func generateHeaders(#path: String) {
     
     if isTargetExtension(path: path) {
         
-        createHeader(sourcePath: path)
+        println("DEBUG: \(path)")
+        dispatchAsync {
+            
+            createHeader(sourcePath: path)
+        }
     }
     else {
     
@@ -151,7 +168,7 @@ func prepareDestinationPath() {
     
     if !isDirectory(path: path) {
         
-        if fileManager.createDirectoryAtPath(path, withIntermediateDirectories: true, attributes: nil, error: nil) {
+        if !fileManager.createDirectoryAtPath(path, withIntermediateDirectories: true, attributes: nil, error: nil) {
             
             fatalError("failed to create a directory for destination.")
         }
@@ -162,6 +179,9 @@ println("Start generating...")
 
 prepareDestinationPath()
 generateHeaders(path: SourceRoot)
+
+dispatchWait()
+
 createImportHeader()
 
 println("Done.")
