@@ -67,7 +67,7 @@ func getExtension(#path: String) -> String? {
     let pathString = path as NSString
     let pathExtension = pathString.pathExtension
     
-    return count(pathExtension) > 0 ? pathExtension : nil
+    return countElements(pathExtension) > 0 ? pathExtension : nil
 }
 
 func isTargetExtension(#path:String) -> Bool {
@@ -90,7 +90,7 @@ func makeHeaderFilenameBy(#sourcePath: String) -> String {
         
         if path.hasPrefix(SourceRoot) {
             
-            let startIndex = advance(path.startIndex, count(SourceRoot) + 1)
+            let startIndex = advance(path.startIndex, countElements(SourceRoot) + 1)
 
             return path.substringFromIndex(startIndex)
         }
@@ -133,7 +133,7 @@ func getContentsOf(#path: String) -> [String] {
     
     if isDirectory(path: path) {
         
-        return fileManager.contentsOfDirectoryAtPath(path, error: nil) as! [String]
+        return fileManager.contentsOfDirectoryAtPath(path, error: nil) as [String]
     }
     else {
         
